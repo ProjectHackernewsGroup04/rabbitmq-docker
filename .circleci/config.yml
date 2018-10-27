@@ -1,0 +1,33 @@
+version: 2
+jobs:
+  build:
+    machine: true
+    steps:
+      - checkout
+
+      - run: docker login -u $DOCKER_USER -p $DOCKER_PASS
+      - run: docker build -t hnclonecphb/rabbitmq-docker:$CIRCLE_BRANCH .
+      - run: docker push hnclonecphb/rabbitmq-docker:$CIRCLE_BRANCH
+  
+  deploy:
+    machine:
+      enabled: true
+    steps:
+      - run:
+          name: Deploy over SSH
+          command: |
+            ssh $SSH_USER@$SSH_HOST "docker pull hnclonecphb/rabbitmq:$CIRCLE_BRANCH
+            docker stop rabbitmq 
+            docker rm rabbitmq
+            docker run --name rabbitmq --network=hnclone-network -d hnclonecphb/rabbitmq:$CIRCLE_BRANCH"
+workflows:
+  version: 2
+  build-and-deploy:
+    jobs:
+      - build
+      - deploy:
+          requires:
+            - build
+          filters:
+            branches:
+              only: master
