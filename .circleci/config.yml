@@ -8,6 +8,8 @@ jobs:
       - run: docker login -u $DOCKER_USER -p $DOCKER_PASS
       - run: docker build -t hnclonecphb/rabbitmq-docker:$CIRCLE_BRANCH .
       - run: docker push hnclonecphb/rabbitmq-docker:$CIRCLE_BRANCH
+      - run: docker build -t hnclonecphb/rabbitmq-docker:$CIRCLE_WORKFLOW_ID .
+      - run: docker push hnclonecphb/rabbitmq-docker:$CIRCLE_WORKFLOW_ID
   
   deploy:
     machine:
@@ -16,10 +18,7 @@ jobs:
       - run:
           name: Deploy over SSH
           command: |
-            ssh $SSH_USER@$SSH_HOST "docker pull hnclonecphb/rabbitmq-docker:$CIRCLE_BRANCH
-            docker stop rabbitmq 
-            docker rm rabbitmq
-            docker run --name rabbitmq --network=hnclone-network -d hnclonecphb/rabbitmq-docker:$CIRCLE_BRANCH"
+            ssh $SSH_USER@$SSH_HOST "docker service update -d --image hnclonecphb/rabbitmq-docker:$CIRCLE_WORKFLOW_ID rabbitmq "
 workflows:
   version: 2
   build-and-deploy:
