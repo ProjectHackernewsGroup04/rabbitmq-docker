@@ -21,7 +21,7 @@ jobs:
             ssh $SSH_USER@$SSH_HOST "docker pull hnclonecphb/rabbitmq-docker:$CIRCLE_BRANCH
             docker stop rabbitmq 
             docker rm rabbitmq
-            docker run --name rabbitmq --network=hnclone-network -d hnclonecphb/rabbitmq-docker:$CIRCLE_BRANCH"
+            docker run --name rabbitmq --network=hnclone-network --memory=1560m -d hnclonecphb/rabbitmq-docker:$CIRCLE_BRANCH"
 workflows:
   version: 2
   build-and-deploy:
